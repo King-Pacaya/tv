@@ -29,6 +29,28 @@
   </div>
 
   <script>
+    let filaAleatoria = []; // Este array guardará el orden aleatorio de los videos
+    let currentAleatorioIndex = 0; // El índice que llevará la cuenta de los videos reproducidos en modo aleatorio
+
+    function activarAleatorio() {
+      if (isRandom) {
+        // Si ya está en aleatorio, no lo modificamos
+        return;
+      }
+
+      // Crear una fila aleatoria de índices de videos
+      filaAleatoria = Array.from({ length: videos.length }, (_, index) => index);
+      filaAleatoria = filaAleatoria.sort(() => Math.random() - 0.5); // Desordenar aleatoriamente
+      currentAleatorioIndex = 0; // Reiniciar el índice de la fila aleatoria
+      isRandom = true;
+      showRandomModal("Reproducción aleatoria activada");
+    }
+
+    function desactivarAleatorio() {
+      isRandom = false;
+      showRandomModal("Reproducción aleatoria desactivada");
+    }
+
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -164,13 +186,31 @@
     
     function nextVideo() {
       if (videos.length === 0) return;
-      currentIndex = isRandom ? Math.floor(Math.random() * videos.length) : (currentIndex + 1) % videos.length;
+
+      if (isRandom) {
+        // Si estamos en modo aleatorio, usa la fila aleatoria
+        currentAleatorioIndex = (currentAleatorioIndex + 1) % filaAleatoria.length;
+        currentIndex = filaAleatoria[currentAleatorioIndex]; // Actualizar el índice de la lista de videos
+      } else {
+        // Si no estamos en aleatorio, sigue el flujo secuencial
+        currentIndex = (currentIndex + 1) % videos.length;
+      }
+
       loadVideo(currentIndex);
     }
-    
+        
     function previousVideo() {
       if (videos.length === 0) return;
-      currentIndex = isRandom ? Math.floor(Math.random() * videos.length) : (currentIndex - 1 + videos.length) % videos.length;
+
+      if (isRandom) {
+        // Si estamos en modo aleatorio, navega al anterior en la fila aleatoria
+        currentAleatorioIndex = (currentAleatorioIndex - 1 + filaAleatoria.length) % filaAleatoria.length;
+        currentIndex = filaAleatoria[currentAleatorioIndex]; // Actualiza el índice de la lista de videos
+      } else {
+        // Si no estamos en aleatorio, navega secuencialmente
+        currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+      }
+
       loadVideo(currentIndex);
     }
     
